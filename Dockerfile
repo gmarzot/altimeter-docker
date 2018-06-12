@@ -31,14 +31,18 @@ RUN yum -y install rsync
 RUN yum -y install libaio
 RUN yum -y install numactl-devel
 RUN yum -y install initscripts
+
 RUN cd /tmp && unzip `basename $RAMP_ALT_PKG`
+RUN cd /tmp && rm `basename $RAMP_ALT_PKG`
 
 ADD $MYSQL_SRV_PKG $RAMP_ALT_INSTALL_DIR
 ADD $MYSQL_CONJ_PKG $RAMP_ALT_INSTALL_DIR
 
-RUN cd /tmp/altimeter-manager-v2.0.1 && printf "\n\n\n${ALT_PW}\n\n${MYSQL_PW}\n${RAMP_ALT_INSTALL_DIR}/mysql-5.7.22-linux-glibc2.12-x86_64\n${RAMP_ALT_INSTALL_DIR}/mysql-connector-java-5.1.46\n" | ./install.sh; service altimeter-manager stop
-RUN sed -i 's/\(.*\)mysql.server start\(.*\)/\1mysql.server start --skip-grant-tables \2/' /etc/init.d/altimeter-manager
+RUN cd /tmp/altimeter-manager-v2.0.1 && printf "\n\n\n${ALT_PW}\n\n${MYSQL_PW}\n${RAMP_ALT_INSTALL_DIR}/mysql-5.7.22-linux-glibc2.12-x86_64\n${RAMP_ALT_INSTALL_DIR}/mysql-connector-java-5.1.46\n" | ./install.sh
+
 RUN ls -al ${RAMP_ALT_INSTALL_DIR}/license
 
-CMD ["/sbin/init"]
+ADD docker-entry.sh $RAMP_ALT_INSTALL_DIR
+
+ENTRYPOINT $RAMP_ALT_INSTALL_DIR/docker-entry.sh
 
